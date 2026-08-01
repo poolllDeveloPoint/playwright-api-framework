@@ -1,0 +1,91 @@
+import {test, expect, request} from '@playwright/test'
+
+let token: string
+test('get all articles', async({ request }) => {
+    const limit = 10
+    const response = await request.get(`https://conduit-api.bondaracademy.com/api/articles?limit=${limit}&offset=0`)
+    const responseData = await response.json()
+
+    expect(responseData).toHaveProperty('articles')
+    expect(responseData).toHaveProperty('articlesCount')
+    
+    const articles_count = responseData.articlesCount
+    expect(articles_count).toEqual(limit)
+})
+
+test('get all tags', async({ request }) => {
+    const response = await request.get('https://conduit-api.bondaracademy.com/api/tags')
+    const responseData = await response.json()
+
+    expect(responseData).toHaveProperty('tags')
+})
+
+test.beforeAll('login user', async ({ request }) => {
+    const requestBody = {
+        "email": "imtester@mail.com",
+        "password": "imtester123"
+    }
+    const response = await request.post('https://conduit-api.bondaracademy.com/api/users/login', {
+        data: {user: requestBody}
+    })
+
+    const response_status = await response.status();
+    expect(response_status).toEqual(200)
+
+    const responseBody = await response.json();
+
+    expect(responseBody).toHaveProperty('user')
+    const userData = responseBody.user;
+    expect(userData).toHaveProperty('email')
+    expect(userData).toHaveProperty('username')
+    const user_email = userData.email
+    const username = userData.username
+    const user_token = userData.token
+    expect(user_email).toEqual(requestBody.email)
+    expect(username).toEqual('imtester')
+    expect(user_token).toBeTruthy()
+    token = user_token
+})
+
+test('create article and delete', async({ request }) => {
+    const requestBody = {
+        "article": {
+            "title": "Title",
+            "description": "about",
+            "body": "markdown",
+            "tagList": []
+        }
+    }
+    const response = await request.post('https://conduit-api.bondaracademy.com/api/articles/', {
+        headers: {Authorization: `Token ${token}`},
+        data: requestBody,
+    })
+
+    const response_status = await response.status()
+    expect(response_status).toBe(201)
+
+    const responseBody = await response.json();
+    expect(responseBody).toHaveProperty('article');
+
+    const responseArticle = responseBody.article;
+    expect(responseArticle).toHaveProperty('title')
+    expect(responseArticle).toHaveProperty('description')
+    expect(responseArticle).toHaveProperty('body')
+    expect(responseArticle).toHaveProperty('slug')
+
+    const response_title = responseArticle.title
+    expect(response_title).toEqual(requestBody.article.title)
+    const response_description = responseArticle.description
+    expect(response_description).toEqual(requestBody.article.description)
+    const response_body = responseArticle.body
+    expect(response_body).toEqual(requestBody.article.body)
+    const slug = responseArticle.slug
+
+    const response_delete = await request.delete(`https://conduit-api.bondaracademy.com/api/articles/${slug}`, {
+        headers: {
+            Authorization: `Token ${token}`
+        }
+    })
+    const delete_status_code = await response_delete.status()
+    expect(delete_status_code).toBe(204)
+})
