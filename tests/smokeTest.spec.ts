@@ -1,10 +1,13 @@
-import {test, expect, request} from '@playwright/test'
+import {expect} from '@playwright/test'
+import { test } from '../utils/fixtures'
 
 let token: string
-test('get all articles', async({ request }) => {
+test('get all articles', async({ api }) => {
     const limit = 10
-    const response = await request.get(`https://conduit-api.bondaracademy.com/api/articles?limit=${limit}&offset=0`)
-    const responseData = await response.json()
+    const responseData = await api
+        .path('/articles')
+        .params({limit, offset:0})
+        .getRequest(200)
 
     expect(responseData).toHaveProperty('articles')
     expect(responseData).toHaveProperty('articlesCount')
