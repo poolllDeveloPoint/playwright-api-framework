@@ -5,7 +5,7 @@ export class RequestHandler {
     private defaultBaseUrl: string
     private baseUrl: string
     private apiPath: string
-    private apiParams: object
+    private apiParams: object = {}
     private apiHeaders: Record<string, string>
     private apiBody: object
 
@@ -57,5 +57,31 @@ export class RequestHandler {
         expect(respone_status_code).toBe(status_code)
 
         return await response.json()
+    }
+
+    async postRequest (status_code: number) {
+        const url = this.getUrl()
+        const response = await this.request.post(url, {
+            headers: this.apiHeaders,
+            data: this.apiBody
+        })
+
+        const respone_status_code = await response.status()
+        expect(respone_status_code).toBe(status_code)
+
+        return await response.json()
+    }
+
+    async deleteRequest (status_code: number) {
+        const url = this.getUrl()
+        const response = await this.request.delete(url, {
+            headers: this.apiHeaders,
+            data: this.apiBody
+        })
+
+        const respone_status_code = await response.status()
+        expect(respone_status_code).toBe(status_code)
+
+        return true
     }
 }

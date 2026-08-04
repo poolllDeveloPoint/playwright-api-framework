@@ -50,7 +50,7 @@ test.beforeAll('login user', async ({ request }) => {
     token = user_token
 })
 
-test('create article and delete', async({ request }) => {
+test('create article and delete', async({ api }) => {
     const requestBody = {
         "article": {
             "title": "Title",
@@ -59,18 +59,16 @@ test('create article and delete', async({ request }) => {
             "tagList": []
         }
     }
-    const response = await request.post('https://conduit-api.bondaracademy.com/api/articles/', {
-        headers: {Authorization: `Token ${token}`},
-        data: requestBody,
-    })
 
-    const response_status = await response.status()
-    expect(response_status).toBe(201)
+    const response = await api
+        .path('/articles')
+        .headers({Authorization: `Token ${token}`})
+        .body(requestBody)
+        .postRequest(201)
 
-    const responseBody = await response.json();
-    expect(responseBody).toHaveProperty('article');
+    expect(response).toHaveProperty('article');
 
-    const responseArticle = responseBody.article;
+    const responseArticle = response.article;
     expect(responseArticle).toHaveProperty('title')
     expect(responseArticle).toHaveProperty('description')
     expect(responseArticle).toHaveProperty('body')
@@ -84,11 +82,8 @@ test('create article and delete', async({ request }) => {
     expect(response_body).toEqual(requestBody.article.body)
     const slug = responseArticle.slug
 
-    const response_delete = await request.delete(`https://conduit-api.bondaracademy.com/api/articles/${slug}`, {
-        headers: {
-            Authorization: `Token ${token}`
-        }
-    })
-    const delete_status_code = await response_delete.status()
-    expect(delete_status_code).toBe(204)
+    await api
+        .path(`/articles/${slug}`)
+        .headers({Authorization: `Token ${token}`})
+        .deleteRequest(204)
 })
