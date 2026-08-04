@@ -1,4 +1,5 @@
 import { APIRequestContext, expect } from "@playwright/test"
+import { Logger } from "./logger"
 
 export class RequestHandler {
     private request: APIRequestContext
@@ -8,10 +9,12 @@ export class RequestHandler {
     private apiParams: object = {}
     private apiHeaders: Record<string, string> = {}
     private apiBody: object = {}
+    private logger: Logger
 
-    constructor(request: APIRequestContext, apiBaseUrl: string) {
+    constructor(request: APIRequestContext, apiBaseUrl: string, logger: Logger) {
         this.request = request
         this.defaultBaseUrl = apiBaseUrl
+        this.logger = logger
     }
 
     url (url: string) {
@@ -49,14 +52,17 @@ export class RequestHandler {
 
     async getRequest (status_code: number) {
         const url = this.getUrl()
+        this.logger.logRequest('GET', url, {headers: this.apiHeaders})
         const response = await this.request.get(url, {
             headers: this.apiHeaders,
         })
 
         const respone_status_code = await response.status()
-        expect(respone_status_code).toBe(status_code)
+        const response_json = await response.json()
+        this.logger.logResponse(respone_status_code, response_json)
+        this.statusCodeValidator(respone_status_code, status_code, this.getRequest)
 
-        return await response.json()
+        return response_json
     }
 
     async postRequest (status_code: number) {
@@ -96,5 +102,14 @@ export class RequestHandler {
         expect(respone_status_code).toBe(status_code)
 
         return true
+    }
+
+    private statusCodeValidator(actualStatus: number, expectedStatus: number, callingMethod: Function) {
+        if (actualStatus !== expectedStatus) {
+            const logs = this.logger.getRecentLogs()
+            const error = new Error(`Expected status ${expectedStatus} but got ${actualStatus}\n\n Recent Activity Log:\n\n${logs}`)
+            Error.captureStackTrace(error, callingMethod)
+            throw error
+        }
     }
 }
