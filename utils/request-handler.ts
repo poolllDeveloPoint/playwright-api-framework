@@ -72,6 +72,19 @@ export class RequestHandler {
         return await response.json()
     }
 
+    async putRequest (status_code: number) {
+        const url = this.getUrl()
+        const response = await this.request.put(url, {
+            headers: this.apiHeaders,
+            data: this.apiBody
+        })
+
+        const respone_status_code = await response.status()
+        expect(respone_status_code).toBe(status_code)
+
+        return await response.json()
+    }
+
     async deleteRequest (status_code: number) {
         const url = this.getUrl()
         const response = await this.request.delete(url, {
