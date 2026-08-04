@@ -3,11 +3,11 @@ import { APIRequestContext, expect } from "@playwright/test"
 export class RequestHandler {
     private request: APIRequestContext
     private defaultBaseUrl: string
-    private baseUrl: string
-    private apiPath: string
+    private baseUrl?: string
+    private apiPath: string = ''
     private apiParams: object = {}
-    private apiHeaders: Record<string, string>
-    private apiBody: object
+    private apiHeaders: Record<string, string> = {}
+    private apiBody: object = {}
 
     constructor(request: APIRequestContext, apiBaseUrl: string) {
         this.request = request
