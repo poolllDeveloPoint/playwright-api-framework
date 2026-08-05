@@ -13,40 +13,37 @@ test('get all articles', async({ api }) => {
     expect(responseData).shouldHaveProperty('articlesCount')
     
     const articles_count = responseData.articlesCount
-    expect(articles_count).toEqual(limit)
+    expect(articles_count).shouldEqual(limit)
 })
 
-test('get all tags', async({ request }) => {
-    const response = await request.get('https://conduit-api.bondaracademy.com/api/tags')
-    const responseData = await response.json()
+test('get all tags', async({ api }) => {
+    const responseData = await api
+        .path('/tags')
+        .getRequest(200)
 
-    expect(responseData).toHaveProperty('tags')
+    expect(responseData).shouldHaveProperty('tags')
 })
 
-test.beforeAll('login user', async ({ request }) => {
+test.beforeAll('login user', async ({ api }) => {
     const requestBody = {
         "email": "imtester@mail.com",
         "password": "imtester123"
     }
-    const response = await request.post('https://conduit-api.bondaracademy.com/api/users/login', {
-        data: {user: requestBody}
-    })
+    const responseBody = await api
+        .path('/users/login')
+        .body({user: requestBody})
+        .postRequest(200)
 
-    const response_status = await response.status();
-    expect(response_status).toEqual(200)
-
-    const responseBody = await response.json();
-
-    expect(responseBody).toHaveProperty('user')
+    expect(responseBody).shouldHaveProperty('user')
     const userData = responseBody.user;
-    expect(userData).toHaveProperty('email')
-    expect(userData).toHaveProperty('username')
+    expect(userData).shouldHaveProperty('email')
+    expect(userData).shouldHaveProperty('username')
     const user_email = userData.email
     const username = userData.username
     const user_token = userData.token
-    expect(user_email).toEqual(requestBody.email)
-    expect(username).toEqual('imtester')
-    expect(user_token).toBeTruthy()
+    expect(user_email).shouldEqual(requestBody.email)
+    expect(username).shouldEqual('imtester')
+    expect(user_token).shouldBeTruthy()
     token = user_token
 })
 
@@ -66,20 +63,20 @@ test('create article and delete', async({ api }) => {
         .body(requestBody)
         .postRequest(201)
 
-    expect(response).toHaveProperty('article');
+    expect(response).shouldHaveProperty('article');
 
     const responseArticle = response.article;
-    expect(responseArticle).toHaveProperty('title')
-    expect(responseArticle).toHaveProperty('description')
-    expect(responseArticle).toHaveProperty('body')
-    expect(responseArticle).toHaveProperty('slug')
+    expect(responseArticle).not.shouldHaveProperty('title')
+    expect(responseArticle).shouldHaveProperty('description')
+    expect(responseArticle).shouldHaveProperty('body')
+    expect(responseArticle).shouldHaveProperty('slug')
 
     const response_title = responseArticle.title
-    expect(response_title).toEqual(requestBody.article.title)
+    expect(response_title).shouldEqual(requestBody.article.title)
     const response_description = responseArticle.description
-    expect(response_description).toEqual(requestBody.article.description)
+    expect(response_description).shouldEqual(requestBody.article.description)
     const response_body = responseArticle.body
-    expect(response_body).toEqual(requestBody.article.body)
+    expect(response_body).shouldEqual(requestBody.article.body)
     const slug = responseArticle.slug
 
     await api
@@ -104,20 +101,20 @@ test('create, update and delete article', async({ api }) => {
         .body(requestBody)
         .postRequest(201)
 
-    expect(response).toHaveProperty('article');
+    expect(response).shouldHaveProperty('article');
 
     const responseArticle = response.article;
-    expect(responseArticle).toHaveProperty('title')
-    expect(responseArticle).toHaveProperty('description')
-    expect(responseArticle).toHaveProperty('body')
-    expect(responseArticle).toHaveProperty('slug')
+    expect(responseArticle).shouldHaveProperty('title')
+    expect(responseArticle).shouldHaveProperty('description')
+    expect(responseArticle).shouldHaveProperty('body')
+    expect(responseArticle).shouldHaveProperty('slug')
 
     const response_title = responseArticle.title
-    expect(response_title).toEqual(requestBody.article.title)
+    expect(response_title).shouldEqual(requestBody.article.title)
     const response_description = responseArticle.description
-    expect(response_description).toEqual(requestBody.article.description)
+    expect(response_description).shouldEqual(requestBody.article.description)
     const response_body = responseArticle.body
-    expect(response_body).toEqual(requestBody.article.body)
+    expect(response_body).shouldEqual(requestBody.article.body)
     const slug_article = responseArticle.slug
 
     const requestBodyForEdit = {
@@ -135,20 +132,20 @@ test('create, update and delete article', async({ api }) => {
         .body(requestBodyForEdit)
         .putRequest(200)
 
-    expect(responseBodyEdited).toHaveProperty('article');
+    expect(responseBodyEdited).shouldHaveProperty('article');
 
     const responseArticleEdited = responseBodyEdited.article;
-    expect(responseArticleEdited).toHaveProperty('title')
-    expect(responseArticleEdited).toHaveProperty('description')
-    expect(responseArticleEdited).toHaveProperty('body')
-    expect(responseArticleEdited).toHaveProperty('slug')
+    expect(responseArticleEdited).shouldHaveProperty('title')
+    expect(responseArticleEdited).shouldHaveProperty('description')
+    expect(responseArticleEdited).shouldHaveProperty('body')
+    expect(responseArticleEdited).shouldHaveProperty('slug')
 
     const response_title_edited = responseArticleEdited.title
-    expect(response_title_edited).toEqual(responseBodyEdited.article.title)
+    expect(response_title_edited).shouldEqual(responseBodyEdited.article.title)
     const response_description_edited = responseArticleEdited.description
-    expect(response_description_edited).toEqual(responseBodyEdited.article.description)
+    expect(response_description_edited).shouldEqual(responseBodyEdited.article.description)
     const response_body_edited = responseArticleEdited.body
-    expect(response_body_edited).toEqual(responseBodyEdited.article.body)
+    expect(response_body_edited).shouldEqual(responseBodyEdited.article.body)
     const slug_article_edited = responseArticleEdited.slug
 
     await api
