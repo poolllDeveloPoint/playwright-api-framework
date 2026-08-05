@@ -1,4 +1,4 @@
-import {expect} from '@playwright/test'
+import { expect } from '../utils/custom-expect'
 import { test } from '../utils/fixtures'
 
 let token: string
@@ -9,8 +9,8 @@ test('get all articles', async({ api }) => {
         .params({limit, offset:0})
         .getRequest(200)
 
-    expect(responseData).toHaveProperty('articles')
-    expect(responseData).toHaveProperty('articlesCount')
+    expect(responseData).shouldHaveProperty('articles')
+    expect(responseData).shouldHaveProperty('articlesCount')
     
     const articles_count = responseData.articlesCount
     expect(articles_count).toEqual(limit)
