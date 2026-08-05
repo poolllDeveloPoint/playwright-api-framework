@@ -24,10 +24,10 @@ test('get all tags', async({ api }) => {
     expect(responseData).shouldHaveProperty('tags')
 })
 
-test.beforeAll('login user', async ({ api }) => {
+test.beforeAll('login user', async ({ api, config }) => {
     const requestBody = {
-        "email": "imtester@mail.com",
-        "password": "imtester123"
+        "email": config.usermail,
+        "password": config.password,
     }
     const responseBody = await api
         .path('/users/login')
@@ -66,7 +66,7 @@ test('create article and delete', async({ api }) => {
     expect(response).shouldHaveProperty('article');
 
     const responseArticle = response.article;
-    expect(responseArticle).not.shouldHaveProperty('title')
+    expect(responseArticle).shouldHaveProperty('title')
     expect(responseArticle).shouldHaveProperty('description')
     expect(responseArticle).shouldHaveProperty('body')
     expect(responseArticle).shouldHaveProperty('slug')
