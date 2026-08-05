@@ -52,7 +52,7 @@ export class RequestHandler {
 
     async getRequest (status_code: number) {
         const url = this.getUrl()
-        this.logger.logRequest('GET', url, {headers: this.apiHeaders})
+        this.logger.logRequest('GET', url, this.headers)
         const response = await this.request.get(url, {
             headers: this.apiHeaders,
         })
@@ -67,39 +67,45 @@ export class RequestHandler {
 
     async postRequest (status_code: number) {
         const url = this.getUrl()
+        this.logger.logRequest('POST', url, this.apiHeaders, this.apiBody)
         const response = await this.request.post(url, {
             headers: this.apiHeaders,
             data: this.apiBody
         })
 
         const respone_status_code = await response.status()
-        expect(respone_status_code).toBe(status_code)
+        const response_json = await response.json()
+        this.logger.logResponse(respone_status_code, response_json)
+        this.statusCodeValidator(respone_status_code, status_code, this.postRequest)
 
-        return await response.json()
+        return response_json
     }
 
     async putRequest (status_code: number) {
         const url = this.getUrl()
+        this.logger.logRequest('PUT', url, this.apiHeaders, this.apiBody)
         const response = await this.request.put(url, {
             headers: this.apiHeaders,
             data: this.apiBody
         })
 
-        const respone_status_code = await response.status()
-        expect(respone_status_code).toBe(status_code)
+        const response_status_code = await response.status()
+        const response_json = await response.json()
+        this.statusCodeValidator(response_status_code, status_code, this.putRequest)
 
-        return await response.json()
+        return response_json
     }
 
     async deleteRequest (status_code: number) {
         const url = this.getUrl()
+        this.logger.logRequest('DELETE', url, this.apiHeaders, this.apiBody)
         const response = await this.request.delete(url, {
             headers: this.apiHeaders,
             data: this.apiBody
         })
 
         const respone_status_code = await response.status()
-        expect(respone_status_code).toBe(status_code)
+        this.logger.logResponse(respone_status_code, status_code)
 
         return true
     }
