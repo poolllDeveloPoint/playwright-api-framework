@@ -25,8 +25,8 @@ test('get all tags', async({ api }) => {
     expect(responseData).shouldHaveProperty('tags')
 })
 
-test.beforeAll('login user', async ({ api, config }) => {
-    authorization = await createToken(api, config.usermail, config.password)
+test.beforeAll('login user', async () => {
+    authorization = await createToken()
 })
 
 test('create article and delete', async({ api }) => {

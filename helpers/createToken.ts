@@ -1,10 +1,15 @@
+import { config } from "../api-test.config";
+import { APILogger } from "../utils/logger";
 import { RequestHandler } from "../utils/request-handler";
+import { request } from "@playwright/test";
 
-
-export async function createToken(api: RequestHandler, usermail: string, password: string ) {
+export async function createToken() {
+    const context = await request.newContext()
+    const logger = new APILogger()
+    const api = new RequestHandler(context, config.apiUrl, logger)
     const requestBody = {
-        "email": usermail,
-        "password": password,
+        "email": config.usermail,
+        "password": config.password,
     }
     const responseBody = await api
         .path('/users/login')
