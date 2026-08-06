@@ -1,7 +1,8 @@
+import { createToken } from '../helpers/createToken'
 import { expect } from '../utils/custom-expect'
 import { test } from '../utils/fixtures'
 
-let token: string
+let authorization: string
 test('get all articles', async({ api }) => {
     const limit = 10
     const responseData = await api
@@ -25,26 +26,7 @@ test('get all tags', async({ api }) => {
 })
 
 test.beforeAll('login user', async ({ api, config }) => {
-    const requestBody = {
-        "email": config.usermail,
-        "password": config.password,
-    }
-    const responseBody = await api
-        .path('/users/login')
-        .body({user: requestBody})
-        .postRequest(200)
-
-    expect(responseBody).shouldHaveProperty('user')
-    const userData = responseBody.user;
-    expect(userData).shouldHaveProperty('email')
-    expect(userData).shouldHaveProperty('username')
-    const user_email = userData.email
-    const username = userData.username
-    const user_token = userData.token
-    expect(user_email).shouldEqual(requestBody.email)
-    expect(username).shouldEqual('imtester')
-    expect(user_token).shouldBeTruthy()
-    token = user_token
+    authorization = await createToken(api, config.usermail, config.password)
 })
 
 test('create article and delete', async({ api }) => {
@@ -59,7 +41,7 @@ test('create article and delete', async({ api }) => {
 
     const response = await api
         .path('/articles')
-        .headers({Authorization: `Token ${token}`})
+        .headers({Authorization: authorization})
         .body(requestBody)
         .postRequest(201)
 
@@ -81,7 +63,7 @@ test('create article and delete', async({ api }) => {
 
     await api
         .path(`/articles/${slug}`)
-        .headers({Authorization: `Token ${token}`})
+        .headers({Authorization: authorization})
         .deleteRequest(204)
 })
 
@@ -97,7 +79,7 @@ test('create, update and delete article', async({ api }) => {
 
     const response = await api
         .path('/articles')
-        .headers({Authorization: `Token ${token}`})
+        .headers({Authorization: authorization})
         .body(requestBody)
         .postRequest(201)
 
@@ -128,7 +110,7 @@ test('create, update and delete article', async({ api }) => {
 
     const responseBodyEdited = await api
         .path(`/articles/${slug_article}`)
-        .headers({Authorization: `Token ${token}`})
+        .headers({Authorization: authorization})
         .body(requestBodyForEdit)
         .putRequest(200)
 
@@ -150,6 +132,6 @@ test('create, update and delete article', async({ api }) => {
 
     await api
         .path(`/articles/${slug_article_edited}`)
-        .headers({Authorization: `Token ${token}`})
+        .headers({Authorization: authorization})
         .deleteRequest(204)
 })
