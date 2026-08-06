@@ -8,16 +8,27 @@ export async function createToken() {
     const logger = new APILogger()
     const api = new RequestHandler(context, config.apiUrl, logger)
     const requestBody = {
-        "email": config.usermail,
-        "password": config.password,
+        user: {
+            "email": config.usermail,
+            "password": config.password,
+        }
     }
-    const responseBody = await api
-        .path('/users/login')
-        .body({user: requestBody})
-        .postRequest(200)
 
-    const userData = responseBody.user;
-    const user_token = userData.token
+    try {
+        const responseBody = await api
+            .path('/users/login')
+            .body(requestBody)
+            .postRequest(200)
 
-    return `Token ${user_token}`
+        const userData = responseBody.user;
+        const user_token = userData.token
+        return `Token ${user_token}`
+    } catch (error) {
+        if (error instanceof Error) {
+            Error.captureStackTrace(error, createToken)
+        }
+        throw error        
+    } finally {
+        await context.dispose()
+    }
 }
