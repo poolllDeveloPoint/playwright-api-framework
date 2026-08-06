@@ -57,6 +57,8 @@ export class RequestHandler {
             headers: this.apiHeaders,
         })
 
+        this.cleanupFields()
+
         const respone_status_code = await response.status()
         const response_json = await response.json()
         this.logger.logResponse(respone_status_code, response_json)
@@ -72,6 +74,8 @@ export class RequestHandler {
             headers: this.apiHeaders,
             data: this.apiBody
         })
+
+        this.cleanupFields()
 
         const respone_status_code = await response.status()
         const response_json = await response.json()
@@ -89,6 +93,8 @@ export class RequestHandler {
             data: this.apiBody
         })
 
+        this.cleanupFields()
+
         const response_status_code = await response.status()
         const response_json = await response.json()
         this.statusCodeValidator(response_status_code, status_code, this.putRequest)
@@ -104,6 +110,8 @@ export class RequestHandler {
             data: this.apiBody
         })
 
+        this.cleanupFields()
+
         const respone_status_code = await response.status()
         this.logger.logResponse(respone_status_code, status_code)
 
@@ -117,5 +125,13 @@ export class RequestHandler {
             Error.captureStackTrace(error, callingMethod)
             throw error
         }
+    }
+
+    private cleanupFields() {
+        this.apiHeaders = {}
+        this.apiBody = {}
+        this.apiParams = {}
+        this.apiPath = ''
+        this.baseUrl = undefined
     }
 }
