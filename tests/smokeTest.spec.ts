@@ -17,6 +17,21 @@ test('get all articles', async({ api }) => {
     expect(articles_count).shouldEqual(limit)
 })
 
+test('get all articles without login', async({ api }) => {
+    const limit = 10
+    const responseData = await api
+        .path('/articles')
+        .params({limit, offset:0})
+        .clearAuth()
+        .getRequest(200)
+
+    expect(responseData).shouldHaveProperty('articles')
+    expect(responseData).shouldHaveProperty('articlesCount')
+    
+    const articles_count = responseData.articlesCount
+    expect(articles_count).shouldEqual(limit)
+})
+
 test('get all tags', async({ api }) => {
     const responseData = await api
         .path('/tags')
