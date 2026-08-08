@@ -1,6 +1,7 @@
 import { createToken } from '../helpers/createToken'
 import { expect } from '../utils/custom-expect'
 import { test } from '../utils/fixtures'
+import { validateSchema } from '../utils/schema-validator'
 
 let authorization: string
 test('get all articles', async({ api }) => {
@@ -36,7 +37,7 @@ test('get all tags', async({ api }) => {
     const responseData = await api
         .path('/tags')
         .getRequest(200)
-
+    await validateSchema('tags', 'GET_tags')
     expect(responseData).shouldHaveProperty('tags')
 })
 
