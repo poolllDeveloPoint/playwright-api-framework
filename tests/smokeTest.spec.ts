@@ -37,7 +37,7 @@ test('get all tags', async({ api }) => {
     const response = await api
         .path('/tags')
         .getRequest(200)
-    await validateSchema('tags', 'GET_tags', response)
+    expect(response).shouldValidateSchema('tags', 'GET_tags')
     expect(response).shouldHaveProperty('tags')
 })
 
