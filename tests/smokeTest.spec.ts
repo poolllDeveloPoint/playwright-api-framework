@@ -34,11 +34,11 @@ test('get all articles without login', async({ api }) => {
 })
 
 test('get all tags', async({ api }) => {
-    const responseData = await api
+    const response = await api
         .path('/tags')
         .getRequest(200)
-    await validateSchema('tags', 'GET_tags')
-    expect(responseData).shouldHaveProperty('tags')
+    await validateSchema('tags', 'GET_tags', response)
+    expect(response).shouldHaveProperty('tags')
 })
 
 test.beforeAll('login user', async () => {
