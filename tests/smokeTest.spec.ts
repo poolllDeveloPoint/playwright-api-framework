@@ -1,7 +1,6 @@
 import { createToken } from '../helpers/createToken'
 import { expect } from '../utils/custom-expect'
 import { test } from '../utils/fixtures'
-import { validateSchema } from '../utils/schema-validator'
 
 let authorization: string
 test('get all articles', async({ api }) => {
@@ -11,6 +10,7 @@ test('get all articles', async({ api }) => {
         .params({limit, offset:0})
         .getRequest(200)
 
+    await expect(responseData).shouldValidateSchema('articles', 'GET_articles')
     expect(responseData).shouldHaveProperty('articles')
     expect(responseData).shouldHaveProperty('articlesCount')
     
