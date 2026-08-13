@@ -11,8 +11,6 @@ test('get all articles', async({ api }) => {
         .getRequest(200)
 
     await expect(responseData).shouldValidateSchema('articles', 'GET_articles')
-    expect(responseData).shouldHaveProperty('articles')
-    expect(responseData).shouldHaveProperty('articlesCount')
     
     const articles_count = responseData.articlesCount
     expect(articles_count).shouldEqual(limit)
@@ -26,8 +24,7 @@ test('get all articles without login', async({ api }) => {
         .clearAuth()
         .getRequest(200)
 
-    expect(responseData).shouldHaveProperty('articles')
-    expect(responseData).shouldHaveProperty('articlesCount')
+    await expect(responseData).shouldValidateSchema('articles', 'GET_articles')
     
     const articles_count = responseData.articlesCount
     expect(articles_count).shouldEqual(limit)
@@ -38,7 +35,6 @@ test('get all tags', async({ api }) => {
         .path('/tags')
         .getRequest(200)
     expect(response).shouldValidateSchema('tags', 'GET_tags')
-    expect(response).shouldHaveProperty('tags')
 })
 
 test.beforeAll('login user', async () => {
@@ -61,20 +57,9 @@ test('create article and delete', async({ api }) => {
         .body(requestBody)
         .postRequest(201)
 
-    expect(response).shouldHaveProperty('article');
+    await expect(response).shouldValidateSchema('articles', 'POST_articles')
 
     const responseArticle = response.article;
-    expect(responseArticle).shouldHaveProperty('title')
-    expect(responseArticle).shouldHaveProperty('description')
-    expect(responseArticle).shouldHaveProperty('body')
-    expect(responseArticle).shouldHaveProperty('slug')
-
-    const response_title = responseArticle.title
-    expect(response_title).shouldEqual(requestBody.article.title)
-    const response_description = responseArticle.description
-    expect(response_description).shouldEqual(requestBody.article.description)
-    const response_body = responseArticle.body
-    expect(response_body).shouldEqual(requestBody.article.body)
     const slug = responseArticle.slug
 
     await api
@@ -99,20 +84,9 @@ test('create, update and delete article', async({ api }) => {
         .body(requestBody)
         .postRequest(201)
 
-    expect(response).shouldHaveProperty('article');
+    await expect(response).shouldValidateSchema('articles', 'POST_articles')
 
     const responseArticle = response.article;
-    expect(responseArticle).shouldHaveProperty('title')
-    expect(responseArticle).shouldHaveProperty('description')
-    expect(responseArticle).shouldHaveProperty('body')
-    expect(responseArticle).shouldHaveProperty('slug')
-
-    const response_title = responseArticle.title
-    expect(response_title).shouldEqual(requestBody.article.title)
-    const response_description = responseArticle.description
-    expect(response_description).shouldEqual(requestBody.article.description)
-    const response_body = responseArticle.body
-    expect(response_body).shouldEqual(requestBody.article.body)
     const slug_article = responseArticle.slug
 
     const requestBodyForEdit = {
@@ -130,20 +104,9 @@ test('create, update and delete article', async({ api }) => {
         .body(requestBodyForEdit)
         .putRequest(200)
 
-    expect(responseBodyEdited).shouldHaveProperty('article');
+    await expect(responseBodyEdited).shouldValidateSchema('articles', 'POST_articles')
 
     const responseArticleEdited = responseBodyEdited.article;
-    expect(responseArticleEdited).shouldHaveProperty('title')
-    expect(responseArticleEdited).shouldHaveProperty('description')
-    expect(responseArticleEdited).shouldHaveProperty('body')
-    expect(responseArticleEdited).shouldHaveProperty('slug')
-
-    const response_title_edited = responseArticleEdited.title
-    expect(response_title_edited).shouldEqual(responseBodyEdited.article.title)
-    const response_description_edited = responseArticleEdited.description
-    expect(response_description_edited).shouldEqual(responseBodyEdited.article.description)
-    const response_body_edited = responseArticleEdited.body
-    expect(response_body_edited).shouldEqual(responseBodyEdited.article.body)
     const slug_article_edited = responseArticleEdited.slug
 
     await api

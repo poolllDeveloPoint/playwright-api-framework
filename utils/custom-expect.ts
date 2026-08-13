@@ -12,7 +12,6 @@ declare global {
     namespace PlaywrightTest {
         interface Matchers<R, T>{
             shouldValidateSchema(dirName: string, fileName: string):Promise<R>
-            shouldHaveProperty(expected: T):R
             shouldEqual(expected: T):R
             shouldBeTruthy(): R
         }
@@ -35,33 +34,6 @@ export const expect = baseExpect.extend({
                 message = `${error.message}\n\n Recent API Activity: \n ${logs}`
             }
         }
-
-        return {
-            message: () => message,
-            pass
-        }
-    },
-    shouldHaveProperty(received: any, expected: any) {
-        let pass: boolean;
-        let logs: string = '';
-
-        try {
-            baseExpect(received).toHaveProperty(expected)
-            pass = true
-            if (this.isNot) {
-                logs = apiLogger.getRecentLogs()
-            }
-        } catch (error) {
-            pass = false
-            logs = apiLogger.getRecentLogs()
-        }
-
-        const hint = this.isNot ? 'not' : ''
-        const message = this.utils.matcherHint('shouldHaveProperty', undefined, undefined, { isNot: this.isNot }) +
-            '\n\n' +
-            `Expected: ${hint} ${this.utils.printExpected(expected)}\n` +
-            `Received: ${this.utils.printReceived(received)}\n\n` +
-            `Recent API Activity: \n ${logs}`
 
         return {
             message: () => message,
