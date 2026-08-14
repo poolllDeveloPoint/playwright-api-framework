@@ -1,6 +1,7 @@
 import { createToken } from '../helpers/createToken'
 import { expect } from '../utils/custom-expect'
 import { test } from '../utils/fixtures'
+import articleRequestObject from '../request-object/POST_article.json'
 
 let authorization: string
 test('get all articles', async({ api }) => {
@@ -42,14 +43,7 @@ test.beforeAll('login user', async () => {
 })
 
 test('create article and delete', async({ api }) => {
-    const requestBody = {
-        "article": {
-            "title": "Title",
-            "description": "about",
-            "body": "markdown",
-            "tagList": []
-        }
-    }
+    const requestBody = articleRequestObject
 
     const response = await api
         .path('/articles')
@@ -69,14 +63,7 @@ test('create article and delete', async({ api }) => {
 })
 
 test('create, update and delete article', async({ api }) => {
-    const requestBody = {
-        "article": {
-            "title": "Title",
-            "description": "about",
-            "body": "markdown",
-            "tagList": []
-        }
-    }
+    const requestBody = articleRequestObject
 
     const response = await api
         .path('/articles')
@@ -89,14 +76,12 @@ test('create, update and delete article', async({ api }) => {
     const responseArticle = response.article;
     const slug_article = responseArticle.slug
 
-    const requestBodyForEdit = {
-        "article": {
-            "title": "Title Edit",
-            "description": "about edit",
-            "body": "markdown edit",
-            "tagList": []
-        }
-    }
+    articleRequestObject.article.title = "Title Edit"
+    articleRequestObject.article.description = "about edit"
+    articleRequestObject.article.body = "markdown edit"
+    articleRequestObject.article.tagList = []
+
+    const requestBodyForEdit = articleRequestObject
 
     const responseBodyEdited = await api
         .path(`/articles/${slug_article}`)
