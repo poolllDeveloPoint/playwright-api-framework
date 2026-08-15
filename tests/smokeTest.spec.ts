@@ -2,6 +2,7 @@ import { createToken } from '../helpers/createToken'
 import { expect } from '../utils/custom-expect'
 import { test } from '../utils/fixtures'
 import articleRequestObject from '../request-object/POST_article.json'
+import { getNewArticle } from '../helpers/generateArticle'
 
 let authorization: string
 test('get all articles', async({ api }) => {
@@ -63,30 +64,26 @@ test('create article and delete', async({ api }) => {
 })
 
 test('create, update and delete article', async({ api }) => {
-    const requestBody = articleRequestObject
+    const newArticle = getNewArticle();
 
     const response = await api
         .path('/articles')
         .headers({Authorization: authorization})
-        .body(requestBody)
+        .body(newArticle)
         .postRequest(201)
 
     await expect(response).shouldValidateSchema('articles', 'POST_articles')
+    expect(response.article.title).shouldEqual(newArticle.article.title)
 
     const responseArticle = response.article;
     const slug_article = responseArticle.slug
 
-    articleRequestObject.article.title = "Title Edit"
-    articleRequestObject.article.description = "about edit"
-    articleRequestObject.article.body = "markdown edit"
-    articleRequestObject.article.tagList = []
-
-    const requestBodyForEdit = articleRequestObject
+    const newArticleForEdit = getNewArticle();
 
     const responseBodyEdited = await api
         .path(`/articles/${slug_article}`)
         .headers({Authorization: authorization})
-        .body(requestBodyForEdit)
+        .body(newArticleForEdit)
         .putRequest(200)
 
     await expect(responseBodyEdited).shouldValidateSchema('articles', 'POST_articles')
