@@ -1,4 +1,4 @@
-import { APIRequestContext, expect } from "@playwright/test"
+import { APIRequestContext, APIResponse, expect } from "@playwright/test"
 import { APILogger } from "./logger"
 
 export class RequestHandler {
@@ -58,6 +58,22 @@ export class RequestHandler {
         return url.toString()
     }
 
+    private async getJsonResponse(response: APIResponse) {
+        try {
+            return await response.json()
+        } catch (error) {
+            const respone_status_code = response.status()
+            const not_content_status_code = [204, 404]
+            const is_not_content_status_code = not_content_status_code.includes(respone_status_code)
+
+            if (is_not_content_status_code) {
+                return {}
+            }
+
+            return {rawBody: await response.text()}
+        }
+    }
+
     async getRequest (status_code: number) {
         const url = this.getUrl()
         this.logger.logRequest('GET', url, this.getHeaders())
@@ -67,10 +83,10 @@ export class RequestHandler {
 
         this.cleanupFields()
 
-        const respone_status_code = await response.status()
-        const response_json = await response.json()
-        this.logger.logResponse(respone_status_code, response_json)
-        this.statusCodeValidator(respone_status_code, status_code, this.getRequest)
+        const response_status_code = response.status()
+        const response_json = await this.getJsonResponse(response)
+        this.logger.logResponse(response_status_code, response_json)
+        this.statusCodeValidator(response_status_code, status_code, this.getRequest)
 
         return response_json
     }
@@ -85,10 +101,10 @@ export class RequestHandler {
 
         this.cleanupFields()
 
-        const respone_status_code = await response.status()
-        const response_json = await response.json()
-        this.logger.logResponse(respone_status_code, response_json)
-        this.statusCodeValidator(respone_status_code, status_code, this.postRequest)
+        const response_status_code = response.status()
+        const response_json = await this.getJsonResponse(response)
+        this.logger.logResponse(response_status_code, response_json)
+        this.statusCodeValidator(response_status_code, status_code, this.postRequest)
 
         return response_json
     }
@@ -103,8 +119,8 @@ export class RequestHandler {
 
         this.cleanupFields()
 
-        const response_status_code = await response.status()
-        const response_json = await response.json()
+        const response_status_code = response.status()
+        const response_json = await this.getJsonResponse(response)
         this.statusCodeValidator(response_status_code, status_code, this.putRequest)
 
         return response_json
@@ -120,8 +136,8 @@ export class RequestHandler {
 
         this.cleanupFields()
 
-        const respone_status_code = await response.status()
-        this.logger.logResponse(respone_status_code, status_code)
+        const response_status_code = response.status()
+        this.logger.logResponse(response_status_code, status_code)
 
         return true
     }
