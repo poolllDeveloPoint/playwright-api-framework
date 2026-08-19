@@ -36,12 +36,20 @@ export default defineConfig({
     {
       name: 'api-smoke-tests',
       testDir: './tests/api',
-      testMatch: '*test',
+      testMatch: ['smokeTest*', 'negativeTest*'],
     },
     {
       name: 'example-tests',
       testDir: './tests/api',
       testMatch: 'example*',
+    },
+    {
+      name: 'ui-tests',
+      testDir: './tests/ui',
+      testMatch: 'smoke*',
+      use: {
+        defaultBrowserType: 'chromium',
+      }
     }
   ],
 });
