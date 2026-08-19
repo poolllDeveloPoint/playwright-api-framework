@@ -22,10 +22,26 @@ export default defineConfig({
   /* Opt out of parallel tests on CI. */
   workers: process.env.CI ? 1 : 1,
 
+  use: {
+    trace: 'retain-on-failure'
+  },
+
   /* Configure projects for major browsers */
   projects: [
     {
       name: 'api-testing',
+      testDir: './tests/api',
+      dependencies: ['api-smoke-tests'],
     },
+    {
+      name: 'api-smoke-tests',
+      testDir: './tests/api',
+      testMatch: '*test',
+    },
+    {
+      name: 'example-tests',
+      testDir: './tests/api',
+      testMatch: 'example*',
+    }
   ],
 });

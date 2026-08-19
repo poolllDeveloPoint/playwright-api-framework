@@ -1,8 +1,8 @@
-import { createToken } from '../helpers/createToken'
-import { expect } from '../utils/custom-expect'
-import { test } from '../utils/fixtures'
-import articleRequestObject from '../request-object/POST_article.json'
-import { getNewArticle } from '../helpers/generateArticle'
+import { createToken } from '../../helpers/createToken'
+import { expect } from '../../utils/custom-expect'
+import { test } from '../../utils/fixtures'
+import articleRequestObject from '../../request-object/POST_article.json'
+import { getNewArticle } from '../../helpers/generateArticle'
 
 let authorization: string
 test('get all articles', async({ api }) => {
