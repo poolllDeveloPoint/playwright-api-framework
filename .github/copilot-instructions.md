@@ -84,7 +84,22 @@ test('Test Description', async ({ api }) => {
 - Token is included in all requests by default
 - Use `.clearAuth()` to remove authentication for specific requests
 
-### 5. Schema Validation Pattern
+### 5. Variable Naming & Conditional Rules
+- Always declare conditional logic in a new descriptive variable before using it in an `if` statement
+- Use meaningful variable names that clearly describe the condition or intent
+- Prefer boolean names that read naturally, such as `is_data_product_exist`, `has_valid_token`, `should_retry_request`
+- Avoid short or unclear names like `flag`, `check`, `value`, or `result` unless they are truly obvious in context
+
+Example:
+```typescript
+const is_data_product_exist = dataArrayProduct.length > 0
+
+if (is_data_product_exist) {
+    // logic here
+}
+```
+
+### 6. Schema Validation Pattern
 - Schema files are generated automatically when they do not exist
 - Schemas are stored in the `response-schemas` folder
 - `shouldMatchSchema(dirName, fileName)` is used for schema validation
