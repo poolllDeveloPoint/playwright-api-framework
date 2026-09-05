@@ -2,8 +2,10 @@ import { config } from "../api-test.config";
 import { APILogger } from "../utils/logger";
 import { RequestHandler } from "../utils/request-handler";
 import { request } from "@playwright/test";
+import { ensureServerRunning } from "../utils/server-check";
 
 export async function createToken() {
+    await ensureServerRunning();
     const context = await request.newContext()
     const logger = new APILogger()
     const api = new RequestHandler(context, config.apiUrl, logger)

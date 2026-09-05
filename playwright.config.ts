@@ -26,6 +26,15 @@ export default defineConfig({
     trace: 'retain-on-failure'
   },
 
+  /* Run local companion server automatically if not already accessible */
+  webServer: {
+    command: 'docker compose up',
+    cwd: __dirname,
+    url: 'http://127.0.0.1:3001/api/tags',
+    reuseExistingServer: !process.env.CI,
+    timeout: 60 * 1000,
+  },
+
   /* Configure projects for major browsers */
   projects: [
     {

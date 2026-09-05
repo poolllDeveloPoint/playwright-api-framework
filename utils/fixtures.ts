@@ -6,6 +6,7 @@ import { config } from '../api-test.config';
 import { createToken } from '../helpers/createToken';
 import { DatabaseHelper } from './db-helper';
 import { RedisHelper } from './redis-helper';
+import { ensureServerRunning } from './server-check';
 
 type TestOptions = {
     api: RequestHandler;
@@ -15,11 +16,17 @@ type TestOptions = {
 };
 
 type WorkerFixture = {
+    ensureServer: void;
     authToken: string;
 };
 
 export const test = base.extend<TestOptions, WorkerFixture>({
-    authToken: [ async ({}, use) => {
+    ensureServer: [ async ({}, use) => {
+        await ensureServerRunning();
+        await use();
+    }, { scope: 'worker', auto: true }],
+
+    authToken: [ async ({ ensureServer }, use) => {
         const authToken = await createToken();
         await use(authToken);
     }, { scope: 'worker' }],
