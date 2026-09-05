@@ -3,6 +3,7 @@ import { expect } from '../../utils/custom-expect'
 import { test } from '../../utils/fixtures'
 import articleRequestObject from '../../request-object/POST_article.json'
 import { getNewArticle } from '../../helpers/generateArticle'
+import { faker } from '@faker-js/faker'
 
 let authorization: string
 test('get all articles', async({ api }) => {
@@ -96,3 +97,58 @@ test('create, update and delete article', async({ api }) => {
         .headers({Authorization: authorization})
         .deleteRequest(204)
 })
+
+test('REQ-USR-01: register a new user successfully', async ({ api }) => {
+    // Keep username between 3 and 20 chars (REQ-USR-02) and eliminate collision
+    const cleanName = faker.internet.username().replace(/[^a-zA-Z0-9]/g, '').slice(0, 14);
+    const uniqueUsername = `${cleanName}_${faker.string.alphanumeric(4)}`;
+    const uniqueEmail = faker.internet.email();
+    const password = faker.internet.password({ length: 12 });
+
+    const res = await api
+        .path('/users')
+        .clearAuth()
+        .body({
+            user: {
+                username: uniqueUsername,
+                email: uniqueEmail,
+                password: password
+            }
+        })
+        .postRequest(201);
+
+    expect(res.user).shouldBeDefined();
+    expect(res.user.username).shouldEqual(uniqueUsername);
+    expect(res.user.email).shouldEqual(uniqueEmail);
+    expect(res.user.token).shouldBeDefined();
+});
+
+test('REQ-ART-01: filter articles by tag', async ({ api }) => {
+    const targetTag = 'playwright';
+    const res = await api
+        .path('/articles')
+        .params({ tag: targetTag, limit: 10, offset: 0 })
+        .clearAuth()
+        .getRequest(200);
+
+    expect(res.articles).shouldBeDefined();
+    expect(res.articles.length).shouldBeGreaterThan(0);
+    for (const article of res.articles) {
+        expect(article.tagList).shouldContain(targetTag);
+    }
+});
+
+test('REQ-ART-01: filter articles by author', async ({ api }) => {
+    const targetAuthor = 'imtester';
+    const res = await api
+        .path('/articles')
+        .params({ author: targetAuthor, limit: 10, offset: 0 })
+        .clearAuth()
+        .getRequest(200);
+
+    expect(res.articles).shouldBeDefined();
+    expect(res.articles.length).shouldBeGreaterThan(0);
+    for (const article of res.articles) {
+        expect(article.author.username).shouldEqual(targetAuthor);
+    }
+});

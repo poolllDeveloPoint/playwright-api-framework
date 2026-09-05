@@ -239,5 +239,6 @@ GET "articles:list:public:10:0:all:all"
 ---
 
 ## 📄 Documentation Links
+- **[Master Test Plan & QA Strategy](TEST_PLAN.md)**
 - **[Functional Specifications & Acceptance Criteria](server/API_REQUIREMENTS.md)**
 - **[Companion Server Operational Guide](server/README.md)**

@@ -158,9 +158,11 @@ export class RequestHandler {
         this.cleanupFields()
 
         const response_status_code = response.status()
-        this.logger.logResponse(response_status_code, status_code)
+        const response_json = await this.getJsonResponse(response)
+        this.logger.logResponse(response_status_code, response_json)
+        this.statusCodeValidator(response_status_code, status_code, this.deleteRequest)
 
-        return true
+        return response_json
     }
 
     private statusCodeValidator(actualStatus: number, expectedStatus: number, callingMethod: Function) {
