@@ -28,7 +28,12 @@ router.post('/login', async (req: Request, res: Response) => {
 
     const dbUser = queryRes.rows[0];
     const token = jwt.sign(
-      { id: dbUser.id, username: dbUser.username, email: dbUser.email },
+      {
+        id: dbUser.id,
+        username: dbUser.username,
+        email: dbUser.email,
+        jti: `${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
+      },
       JWT_SECRET,
       { expiresIn: '7d' }
     );
@@ -94,7 +99,12 @@ router.post('/', async (req: Request, res: Response) => {
 
     const newUser = insertRes.rows[0];
     const token = jwt.sign(
-      { id: newUser.id, username: newUser.username, email: newUser.email },
+      {
+        id: newUser.id,
+        username: newUser.username,
+        email: newUser.email,
+        jti: `${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
+      },
       JWT_SECRET,
       { expiresIn: '7d' }
     );

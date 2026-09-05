@@ -91,6 +91,27 @@ export class RequestHandler {
         return response_json
     }
 
+    async getResponseWithHeaders(status_code: number): Promise<{ body: any; headers: Record<string, string>; status: number }> {
+        const url = this.getUrl()
+        this.logger.logRequest('GET', url, this.getHeaders())
+        const response = await this.request.get(url, {
+            headers: this.getHeaders(),
+        })
+
+        this.cleanupFields()
+
+        const response_status_code = response.status()
+        const response_json = await this.getJsonResponse(response)
+        this.logger.logResponse(response_status_code, response_json)
+        this.statusCodeValidator(response_status_code, status_code, this.getRequest)
+
+        return {
+            body: response_json,
+            headers: response.headers(),
+            status: response_status_code,
+        }
+    }
+
     async postRequest (status_code: number) {
         const url = this.getUrl()
         this.logger.logRequest('POST', url, this.getHeaders(), this.apiBody)

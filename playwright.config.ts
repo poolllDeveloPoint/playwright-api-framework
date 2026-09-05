@@ -36,7 +36,7 @@ export default defineConfig({
     {
       name: 'api-smoke-tests',
       testDir: './tests/api',
-      testMatch: ['smokeTest*', 'negativeTest*'],
+      testMatch: ['smokeTest*', 'negativeTest*', 'cacheAndDb*'],
     },
     {
       name: 'example-tests',
