@@ -3,7 +3,22 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
-  "scripts": {},
+  "scripts": {
+    "start:server": "tsx server/src/index.ts",
+    "start:server:watch": "tsx watch server/src/index.ts",
+    "docker:up": "docker compose up -d --build",
+    "docker:infra": "docker compose up -d postgres redis",
+    "docker:logs:api": "docker compose logs -f api",
+    "docker:down": "docker compose down",
+    "db:migrate": "tsx server/src/db/migrator.ts",
+    "db:rollback": "tsx server/src/db/migrator.ts --rollback",
+    "db:seed": "tsx server/src/db/seeder.ts",
+    "db:reset": "tsx server/src/db/seeder.ts --reset",
+    "db:psql": "docker exec -it playwright-framework-postgres psql -U postgres -d articlehub_test",
+    "redis:cli": "docker exec -it playwright-framework-redis redis-cli",
+    "test": "playwright test",
+    "test:ui": "playwright test --ui"
+  },
   "keywords": [],
   "author": "",
   "license": "ISC",
@@ -11,11 +26,28 @@
   "devDependencies": {
     "@faker-js/faker": "^10.6.0",
     "@playwright/test": "^1.62.1",
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.6",
+    "@types/jsonwebtoken": "^9.0.10",
+    "@types/morgan": "^1.9.10",
     "@types/node": "^26.1.2",
+    "@types/pg": "^8.23.1",
+    "@types/swagger-ui-express": "^4.1.8",
+    "@types/yamljs": "^0.2.34",
     "ajv": "^8.20.0",
-    "genson-js": "^0.0.8"
+    "genson-js": "^0.0.8",
+    "tsx": "^4.23.13"
   },
   "dependencies": {
-    "ajv-formats": "^3.0.1"
+    "ajv-formats": "^3.0.1",
+    "cors": "^2.8.6",
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "ioredis": "^6.0.0",
+    "jsonwebtoken": "^9.0.3",
+    "morgan": "^1.12.0",
+    "pg": "^8.23.0",
+    "swagger-ui-express": "^5.0.1",
+    "yamljs": "^0.3.0"
   }
 }

@@ -1,0 +1,435 @@
+openapi: 3.0.3
+info:
+  title: ArticleHub API (Playwright Portfolio Sample Server)
+  description: |
+    Sample API server for end-to-end automation testing with **Playwright**, **PostgreSQL**, and **Redis**.
+    Supports **Direct DB Verification**, **Redis Cache Invalidation**, and **Schema Validation**.
+  version: 1.0.0
+servers:
+  - url: http://localhost:3001/api
+    description: Local Test Server
+
+components:
+  securitySchemes:
+    TokenAuth:
+      type: apiKey
+      in: header
+      name: Authorization
+      description: Enter token in the format `Token <jwt_token>`
+
+  schemas:
+    UserLoginRequest:
+      type: object
+      required:
+        - user
+      properties:
+        user:
+          type: object
+          required:
+            - email
+            - password
+          properties:
+            email:
+              type: string
+              example: imtester@mail.com
+            password:
+              type: string
+              example: imtester123
+
+    UserRegisterRequest:
+      type: object
+      required:
+        - user
+      properties:
+        user:
+          type: object
+          required:
+            - username
+            - email
+            - password
+          properties:
+            username:
+              type: string
+              example: tester_portfolio
+            email:
+              type: string
+              example: newtester@mail.com
+            password:
+              type: string
+              example: secret123
+
+    UserResponse:
+      type: object
+      properties:
+        user:
+          type: object
+          properties:
+            email:
+              type: string
+            token:
+              type: string
+            username:
+              type: string
+            bio:
+              type: string
+              nullable: true
+            image:
+              type: string
+
+    ArticleRequest:
+      type: object
+      required:
+        - article
+      properties:
+        article:
+          type: object
+          required:
+            - title
+            - description
+            - body
+          properties:
+            title:
+              type: string
+              example: How to Test Redis and PostgreSQL with Playwright
+            description:
+              type: string
+              example: Comprehensive guide on integration API testing with database and cache
+            body:
+              type: string
+              example: Markdown content detailing end-to-end testing practices...
+            tagList:
+              type: array
+              items:
+                type: string
+              example: ["playwright", "redis", "postgresql", "sdet"]
+
+    Article:
+      type: object
+      required:
+        - slug
+        - title
+        - description
+        - body
+        - tagList
+        - createdAt
+        - updatedAt
+        - favorited
+        - favoritesCount
+        - author
+      properties:
+        slug:
+          type: string
+        title:
+          type: string
+        description:
+          type: string
+        body:
+          type: string
+        tagList:
+          type: array
+          items:
+            type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        favorited:
+          type: boolean
+        favoritesCount:
+          type: integer
+        published:
+          type: boolean
+          description: True if published for public access, false if still draft.
+        author:
+          type: object
+          required:
+            - username
+            - bio
+            - image
+            - following
+          properties:
+            username:
+              type: string
+            bio:
+              type: string
+              nullable: true
+            image:
+              type: string
+            following:
+              type: boolean
+
+    SingleArticleResponse:
+      type: object
+      required:
+        - article
+      properties:
+        article:
+          $ref: '#/components/schemas/Article'
+
+    MultipleArticlesResponse:
+      type: object
+      required:
+        - articles
+        - articlesCount
+      properties:
+        articles:
+          type: array
+          items:
+            $ref: '#/components/schemas/Article'
+        articlesCount:
+          type: integer
+
+    TagsResponse:
+      type: object
+      required:
+        - tags
+      properties:
+        tags:
+          type: array
+          items:
+            type: string
+
+paths:
+  /users/login:
+    post:
+      summary: User Login
+      description: Authenticate user and receive JWT token for API testing.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserLoginRequest'
+      responses:
+        200:
+          description: Successfully authenticated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponse'
+        401:
+          description: Invalid email or password
+
+  /users/logout:
+    post:
+      summary: User Logout
+      description: Invalidate the current JWT token server-side via Redis token revocation blocklist.
+      security:
+        - TokenAuth: []
+      responses:
+        200:
+          description: Successfully logged out
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Successfully logged out
+        401:
+          description: Unauthorized (missing, invalid, or already-revoked token)
+
+  /users:
+    post:
+      summary: Register User
+      description: Create a new user account with username length validation (3-20 chars).
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserRegisterRequest'
+      responses:
+        201:
+          description: Successfully created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponse'
+        422:
+          description: Unprocessable Entity (e.g. username too short/long)
+
+  /tags:
+    get:
+      summary: Get All Tags
+      description: Return list of all available tags.
+      responses:
+        200:
+          description: List of tags
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TagsResponse'
+
+  /articles:
+    get:
+      summary: Get Recent Articles
+      description: |
+        Get list of articles with pagination.
+        Demonstrates **Redis Cache Hit / Miss**: Look at `X-Cache` response header (`HIT` or `MISS`).
+        When authenticated with Author token, returns published articles + author's own draft articles.
+      security:
+        - {}
+        - TokenAuth: []
+      parameters:
+        - name: limit
+          in: query
+          description: Limit number of articles returned
+          required: false
+          schema:
+            type: integer
+            default: 10
+        - name: offset
+          in: query
+          description: Offset for pagination
+          required: false
+          schema:
+            type: integer
+            default: 0
+        - name: tag
+          in: query
+          description: Filter by tag
+          required: false
+          schema:
+            type: string
+        - name: author
+          in: query
+          description: Filter by author username
+          required: false
+          schema:
+            type: string
+      responses:
+        200:
+          description: List of articles
+          headers:
+            X-Cache:
+              schema:
+                type: string
+              description: Indicates whether response was served from Redis (HIT) or PostgreSQL (MISS)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MultipleArticlesResponse'
+
+    post:
+      summary: Create Article
+      description: Create a new article. Persists to PostgreSQL and invalidates Redis articles cache.
+      security:
+        - TokenAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ArticleRequest'
+      responses:
+        201:
+          description: Article successfully created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SingleArticleResponse'
+        401:
+          description: Unauthorized
+        422:
+          description: Unprocessable Entity
+
+  /articles/{slug}:
+    get:
+      summary: Get Article by Slug
+      description: Fetch a single article by its slug. Checks Redis cache first. Public sees published articles; Author can view their own draft.
+      security:
+        - {}
+        - TokenAuth: []
+      parameters:
+        - name: slug
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Single article
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SingleArticleResponse'
+        404:
+          description: Article not found
+
+    put:
+      summary: Update Article
+      description: Update article fields. Persists to PostgreSQL and evicts Redis cache.
+      security:
+        - TokenAuth: []
+      parameters:
+        - name: slug
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ArticleRequest'
+      responses:
+        200:
+          description: Article updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SingleArticleResponse'
+        401:
+          description: Unauthorized
+        404:
+          description: Article not found
+
+    delete:
+      summary: Delete Article
+      description: Delete article from PostgreSQL and evict Redis cache.
+      security:
+        - TokenAuth: []
+      parameters:
+        - name: slug
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        204:
+          description: Article deleted
+        401:
+          description: Unauthorized
+        404:
+          description: Article not found
+
+  /articles/{slug}/publish:
+    post:
+      summary: Publish Article
+      description: Publish a draft article so it becomes available to public / unauthenticated users. Only the author can publish.
+      security:
+        - TokenAuth: []
+      parameters:
+        - name: slug
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Article successfully published
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SingleArticleResponse'
+        401:
+          description: Unauthorized
+        403:
+          description: Forbidden (only author can publish)
+        404:
+          description: Article not found
