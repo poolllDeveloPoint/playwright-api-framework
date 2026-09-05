@@ -1,5 +1,6 @@
 const config = {
     apiUrl: process.env.API_URL || 'http://127.0.0.1:3001/api',
+    webUrl: process.env.WEB_URL || 'http://127.0.0.1:3002',
     usermail: process.env.USER_EMAIL || 'imtester@mail.com',
     password: process.env.USER_PASSWORD || 'imtester123',
     db: {

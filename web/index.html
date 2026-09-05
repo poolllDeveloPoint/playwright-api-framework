@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="ArticleHub — The modern publication platform for engineering, architecture, and technology insights." />
+  <title>ArticleHub — The Modern Publishing Platform</title>
+
+  <!-- Google Fonts: Inter & JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+  <!-- App Stylesheet -->
+  <link rel="stylesheet" href="./css/style.css" />
+</head>
+<body>
+
+  <!-- Top Glassmorphism Navigation Bar -->
+  <header class="navbar">
+    <div class="brand-container" onclick="location.reload()" title="Back to home">
+      <div class="brand-logo">AH</div>
+      <div>
+        <div class="brand-title">ArticleHub</div>
+      </div>
+      <span class="brand-badge">Platform</span>
+    </div>
+
+    <nav class="nav-actions" id="nav-actions">
+      <!-- Dynamically rendered by ui.renderNavbar() -->
+    </nav>
+  </header>
+
+  <!-- Hero Banner -->
+  <section class="hero-banner">
+    <h1 class="hero-headline">Publish, Share & <span>Explore</span> Knowledge</h1>
+    <p class="hero-subhead">
+      A high-performance publication platform engineered for tech writers, software architects, and curious minds.
+    </p>
+
+    <!-- Platform Performance & Edge Cache Inspector -->
+    <div class="diagnostic-bar" id="diagnostic-inspector" title="System Performance & Edge Cache Status">
+      <div class="diag-item">
+        <span class="diag-dot active"></span>
+        <span style="color: var(--text-muted);">Engine:</span>
+        <strong style="color: var(--accent-emerald);">ONLINE</strong>
+      </div>
+      <div style="color: var(--border-color);">|</div>
+      <div class="diag-item">
+        <span style="color: var(--text-muted);">Cache:</span>
+        <span id="diag-cache-pill" class="cache-pill none">NONE</span>
+      </div>
+      <div style="color: var(--border-color);">|</div>
+      <div class="diag-item">
+        <span style="color: var(--text-muted);">Response:</span>
+        <span id="diag-latency" style="color: var(--text-primary); font-weight: 600;">0ms</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Main Workspace Grid -->
+  <main class="main-container">
+    <div class="content-grid">
+      
+      <!-- Left Column: Feed Tabs, Active Filter, & Articles -->
+      <section class="feed-column">
+        <div class="feed-header">
+          <div class="tab-nav" id="feed-tabs">
+            <!-- Dynamically populated: Global Feed vs My Articles -->
+          </div>
+          <div id="active-filter-container">
+            <!-- Dynamically populated: Tag filter badge -->
+          </div>
+        </div>
+
+        <!-- Articles List Container -->
+        <div class="articles-list" id="articles-container">
+          <div class="state-box">
+            <div class="spinner"></div>
+            <p>Loading articles...</p>
+          </div>
+        </div>
+
+        <!-- Pagination Controls -->
+        <div class="pagination-container" id="pagination-container" style="display: none;">
+          <div class="pagination-info" id="pagination-info">Page 1</div>
+          <div class="pagination-buttons">
+            <button id="btn-page-prev" class="btn btn-outline btn-sm">← Previous</button>
+            <button id="btn-page-next" class="btn btn-outline btn-sm">Next →</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Right Column: Sidebar (Tags & About Platform) -->
+      <aside class="sidebar">
+        <!-- Popular Tags Card -->
+        <div class="sidebar-card">
+          <h3 class="sidebar-title">🏷️ Popular Tags</h3>
+          <div class="tag-cloud" id="tag-cloud-container">
+            <!-- Dynamically populated by ui.renderTags() -->
+            <span style="color: var(--text-muted); font-size: 0.8rem;">Loading tags...</span>
+          </div>
+        </div>
+
+        <!-- Platform Features & Tech Highlights -->
+        <div class="sidebar-card">
+          <h3 class="sidebar-title">⚡ Platform Highlights</h3>
+          <div class="spec-list">
+            <div class="spec-item">
+              <span class="spec-id">High-Speed Caching</span>
+              <span class="spec-status">✓ Redis Powered</span>
+            </div>
+            <div class="spec-item">
+              <span class="spec-id">Data Persistence</span>
+              <span class="spec-status">✓ PostgreSQL</span>
+            </div>
+            <div class="spec-item">
+              <span class="spec-id">Security</span>
+              <span class="spec-status">✓ Stateless JWT</span>
+            </div>
+            <div class="spec-item">
+              <span class="spec-id">Content Workflow</span>
+              <span class="spec-status">✓ Drafts & Publishing</span>
+            </div>
+          </div>
+        </div>
+      </aside>
+
+    </div>
+  </main>
+
+  <!-- ========================================================================
+       Modals Section
+       ======================================================================== -->
+
+  <!-- Modal 1: Sign In -->
+  <div class="modal-backdrop" id="modal-login">
+    <div class="modal-window">
+      <div class="modal-header">
+        <h3 class="modal-title">Sign In to ArticleHub</h3>
+        <button class="modal-close" data-modal-close>&times;</button>
+      </div>
+      <form id="form-login">
+        <div class="modal-body">
+          <div class="form-group">
+            <label class="form-label" for="login-email">Email Address</label>
+            <input type="email" id="login-email" class="form-control" placeholder="name@domain.com" required />
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="login-password">Password</label>
+            <input type="password" id="login-password" class="form-control" placeholder="••••••••" required />
+          </div>
+          <div id="login-error" class="validation-error"></div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline" data-modal-close>Cancel</button>
+          <button type="submit" class="btn btn-primary">Sign In</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal 2: Sign Up / Register -->
+  <div class="modal-backdrop" id="modal-register">
+    <div class="modal-window">
+      <div class="modal-header">
+        <h3 class="modal-title">Create an Account</h3>
+        <button class="modal-close" data-modal-close>&times;</button>
+      </div>
+      <form id="form-register">
+        <div class="modal-body">
+          <div class="form-group">
+            <label class="form-label" for="reg-username">Username</label>
+            <input type="text" id="reg-username" class="form-control" placeholder="Choose a username (3 - 20 chars)" required />
+            <span class="form-hint" id="reg-username-hint">Must be between 3 and 20 characters.</span>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="reg-email">Email Address</label>
+            <input type="email" id="reg-email" class="form-control" placeholder="name@domain.com" required />
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="reg-password">Password</label>
+            <input type="password" id="reg-password" class="form-control" placeholder="Choose a secure password" required />
+          </div>
+          <div id="register-error" class="validation-error"></div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline" data-modal-close>Cancel</button>
+          <button type="submit" class="btn btn-primary">Create Account</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal 3: Article Editor Form (Create & Edit & Draft/Publish) -->
+  <div class="modal-backdrop" id="modal-article">
+    <div class="modal-window">
+      <div class="modal-header">
+        <h3 class="modal-title" id="modal-article-title">Write New Article</h3>
+        <button class="modal-close" data-modal-close>&times;</button>
+      </div>
+      <form id="form-article">
+        <div class="modal-body">
+          <div class="form-group">
+            <label class="form-label" for="art-title">Article Title</label>
+            <input type="text" id="art-title" class="form-control" placeholder="e.g. Distributed Caching Patterns in Modern Microservices" required />
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="art-desc">Summary / Short Description</label>
+            <input type="text" id="art-desc" class="form-control" placeholder="A brief summary of what this article covers..." required />
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="art-body">Article Content</label>
+            <textarea id="art-body" class="form-control" placeholder="Write your full article body here..." required></textarea>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="art-tags">Tags (comma separated)</label>
+            <input type="text" id="art-tags" class="form-control" placeholder="architecture, cloud, engineering" />
+          </div>
+          <div class="form-group" style="padding-top: 0.5rem;">
+            <label class="checkbox-label">
+              <input type="checkbox" id="art-published" />
+              <span>Publish immediately (Leave unchecked to save as <strong>Draft</strong>)</span>
+            </label>
+          </div>
+          <div id="article-form-error" class="validation-error"></div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline" data-modal-close>Cancel</button>
+          <button type="submit" class="btn btn-primary" id="btn-save-article">Save Article</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Floating Toast Notifications Container -->
+  <div class="toast-container" id="toast-container"></div>
+
+  <!-- Application Bootstrap (ES Modules) -->
+  <script type="module" src="./js/app.js"></script>
+</body>
+</html>

@@ -6,6 +6,7 @@
   "scripts": {
     "start:server": "tsx server/src/index.ts",
     "start:server:watch": "tsx watch server/src/index.ts",
+    "start:web": "node web/serve.js",
     "docker:up": "docker compose up -d --build",
     "docker:infra": "docker compose up -d postgres redis",
     "docker:status": "docker compose ps",
@@ -20,6 +21,7 @@
     "test": "playwright test",
     "test:ui": "playwright test --ui",
     "test:smoke": "playwright test --project=api-smoke-tests",
+    "test:ui:smoke": "playwright test --project=ui-tests",
     "test:integration": "playwright test tests/api/cacheAndDb.spec.ts --project=api-smoke-tests"
   },
   "keywords": [],
