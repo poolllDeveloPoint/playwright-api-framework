@@ -85,7 +85,7 @@ All requirements are documented in [server/API_REQUIREMENTS.md](server/API_REQUI
 
 ### 1. Clone & Install Dependencies
 ```bash
-git clone <repository-url>
+git clone https://github.com/poolllDeveloPoint/playwright-api-framework.git
 cd playwright-api-framework
 npm install
 ```

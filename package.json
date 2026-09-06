@@ -1,8 +1,12 @@
 {
   "name": "playwright-api-framework",
   "version": "1.0.0",
-  "description": "",
+  "description": "Full-Stack Test Automation & SDET Portfolio Framework built with Playwright (TypeScript), Express.js, PostgreSQL, Redis, and Web Client SPA",
   "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/poolllDeveloPoint/playwright-api-framework.git"
+  },
   "scripts": {
     "start:server": "tsx server/src/index.ts",
     "start:server:watch": "tsx watch server/src/index.ts",
@@ -24,8 +28,19 @@
     "test:ui:smoke": "playwright test --project=ui-tests",
     "test:integration": "playwright test tests/api/cacheAndDb.spec.ts --project=api-smoke-tests"
   },
-  "keywords": [],
-  "author": "",
+  "keywords": [
+    "playwright",
+    "typescript",
+    "test-automation",
+    "sdet",
+    "api-testing",
+    "e2e-testing",
+    "contract-testing",
+    "redis",
+    "postgresql",
+    "express"
+  ],
+  "author": "poolllDeveloPoint",
   "license": "ISC",
   "type": "commonjs",
   "devDependencies": {
