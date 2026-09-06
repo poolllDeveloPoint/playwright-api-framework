@@ -8,7 +8,7 @@ import path from 'path';
  */
 export async function ensureServerRunning(): Promise<void> {
     const rootDir = path.resolve(__dirname, '..');
-    const healthUrl = (process.env.API_URL || 'http://127.0.0.1:3001/api') + '/tags';
+    const healthUrl = (process.env.API_URL || 'http://127.0.0.1:3001/api') + '/health';
 
     // 1. Fast probe: check if server is already responding
     try {
