@@ -57,6 +57,30 @@ services:
     volumes:
       - ./server:/app/server
 
+  ci-runner:
+    profiles: ["ci"]
+    build:
+      context: .
+      dockerfile: Dockerfile.ci
+    container_name: playwright-framework-ci
+    environment:
+      CI: "true"
+      API_URL: http://api:3001/api
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USER: postgres
+      DB_PASSWORD: postgres
+      DB_NAME: articlehub_test
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      api:
+        condition: service_started
+
 volumes:
   pgdata:
   redisdata:

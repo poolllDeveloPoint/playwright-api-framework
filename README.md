@@ -128,6 +128,30 @@ npx playwright show-report
 
 ---
 
+## 🛡️ Pull Request CI Quality Gate (Simulated in Docker)
+
+In modern engineering teams, automated QA test suites serve as an essential **Quality Gate on Pull Requests (PRs)** to prevent breaking API contracts or regressions from merging into the main branch.
+
+This project implements a complete **Dual-CI Quality Gate**:
+
+### 1. Local Docker CI Simulation
+Run the complete PR Quality Gate locally in an isolated Docker environment:
+```bash
+npm run ci:pr
+```
+- **Isolated Ephemeral Stack**: Provisions isolated `postgres`, `redis`, and `api` containers on a temporary network.
+- **Strict Quality Check**: Runs all API smoke tests, negative boundary matrices, schema contracts, DB queries, and Redis cache lifecycle validations.
+- **Automated Verdict**:
+  - `APPROVED TO MERGE 🚀` (Exit code 0): All tests passed cleanly.
+  - `MERGE BLOCKED 🔒` (Exit code 1): Prevents bad code from being pushed or merged.
+- **Automatic Teardown**: Gracefully stops and cleans up all temporary containers and volumes after execution.
+
+### 2. GitHub Actions CI Pipeline (`.github/workflows/pr-quality-gate.yml`)
+- Triggered automatically on every `push` and `pull_request` targeting `master` or `main`.
+- Runs against PostgreSQL 16 and Redis 7 service containers in GitHub's cloud runner and uploads HTML reports if tests fail.
+
+---
+
 ## 🛠️ Essential NPM Scripts
 
 | Command | Purpose |
@@ -147,17 +171,10 @@ npx playwright show-report
 | `npm run db:psql` | Opens interactive PostgreSQL CLI terminal (`psql`) |
 | `npm run redis:cli` | Opens interactive Redis CLI terminal (`redis-cli`) |
 | `npm test` | Runs complete Playwright test suite |
-| `npm run test:smoke` | Runs all API smoke tests (smoke, negative boundaries, and cache/db) |
+| `npm run test:smoke` | Runs all API smoke & contract tests (smoke, negative boundaries, cache/db) |
 | `npm run test:integration` | Runs Redis cache, DB persistence, draft/publish, and logout integration tests |
-| `npm run test:ui:smoke` | Runs End-to-End Browser UI smoke tests in Chromium |migrations |
-| `npm run db:rollback` | Reverts the latest batch of migrations |
-| `npm run db:seed` | Seeds test fixtures (default user & sample articles) |
-| `npm run db:reset` | Truncates all tables and re-seeds clean test data |
-| `npm run db:psql` | Opens interactive PostgreSQL CLI terminal (`psql`) |
-| `npm run redis:cli` | Opens interactive Redis CLI terminal (`redis-cli`) |
-| `npm test` | Runs complete Playwright test suite |
-| `npm run test:smoke` | Runs all API smoke tests (13 test cases across smoke, negative, and cache/db) |
-| `npm run test:integration` | Runs Redis cache, DB persistence, draft/publish, and logout integration tests |
+| `npm run test:ui:smoke` | Runs End-to-End Browser UI smoke tests in Chromium |
+| `npm run ci:pr` | Simulates the Pull Request CI Quality Gate inside an isolated Docker network |
 
 ---
 

@@ -1,0 +1,100 @@
+name: Pull Request Quality Gate
+
+on:
+  pull_request:
+    branches: [ master, main ]
+  push:
+    branches: [ master, main ]
+  workflow_dispatch:
+
+jobs:
+  api-quality-gate:
+    name: API & Contract Quality Gate
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: articlehub_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d articlehub_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 5
+
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6380:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: 📥 Checkout repository
+        uses: actions/checkout@v4
+
+      - name: ⚙️ Set up Node.js (v20)
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: 📦 Install dependencies
+        run: npm ci
+
+      - name: 🗄️ Run Database Migrations & Seeds
+        env:
+          DB_HOST: 127.0.0.1
+          DB_PORT: 5432
+          DB_USER: postgres
+          DB_PASSWORD: postgres
+          DB_NAME: articlehub_test
+        run: |
+          npm run db:migrate
+          npm run db:seed
+
+      - name: 🚀 Start ArticleHub Express API Server
+        env:
+          PORT: 3001
+          DB_HOST: 127.0.0.1
+          DB_PORT: 5432
+          DB_USER: postgres
+          DB_PASSWORD: postgres
+          DB_NAME: articlehub_test
+          REDIS_HOST: 127.0.0.1
+          REDIS_PORT: 6380
+          JWT_SECRET: articlehub-secret-key-12345
+        run: |
+          npm run start:server &
+          echo "Waiting for API server to become ready..."
+          npx wait-on http://127.0.0.1:3001/api/tags --timeout 30000
+
+      - name: 🧪 Execute API Smoke, Negative & Contract Quality Gate
+        env:
+          CI: true
+          API_URL: http://127.0.0.1:3001/api
+          DB_HOST: 127.0.0.1
+          DB_PORT: 5432
+          DB_USER: postgres
+          DB_PASSWORD: postgres
+          DB_NAME: articlehub_test
+          REDIS_HOST: 127.0.0.1
+          REDIS_PORT: 6380
+        run: npm run test:smoke
+
+      - name: 📊 Upload Playwright Test Report (On Failure)
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-pr-report
+          path: playwright-report/
+          retention-days: 7

@@ -26,7 +26,8 @@
     "test:ui": "playwright test --ui",
     "test:smoke": "playwright test --project=api-smoke-tests",
     "test:ui:smoke": "playwright test --project=ui-tests",
-    "test:integration": "playwright test tests/api/cacheAndDb.spec.ts --project=api-smoke-tests"
+    "test:integration": "playwright test tests/api/cacheAndDb.spec.ts --project=api-smoke-tests",
+    "ci:pr": "node scripts/simulate-pr-ci.js"
   },
   "keywords": [
     "playwright",

@@ -1,0 +1,29 @@
+FROM node:20-alpine
+
+WORKDIR /app
+
+# Install utility tools (curl & bash)
+RUN apk add --no-cache curl bash
+
+# Copy package definitions and config
+COPY package*.json tsconfig.json ./
+
+# Install project dependencies
+RUN npm install
+
+# Copy application source, test suites, schemas, and helpers
+COPY . .
+
+# Default CI environment variables inside Docker network
+ENV CI=true
+ENV API_URL=http://api:3001/api
+ENV WEB_URL=http://web:3002
+ENV DB_HOST=postgres
+ENV DB_PORT=5432
+ENV DB_USER=postgres
+ENV DB_PASSWORD=postgres
+ENV DB_NAME=articlehub_test
+ENV REDIS_HOST=redis
+ENV REDIS_PORT=6379
+
+CMD ["npm", "run", "test:smoke"]

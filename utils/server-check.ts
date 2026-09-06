@@ -8,7 +8,7 @@ import path from 'path';
  */
 export async function ensureServerRunning(): Promise<void> {
     const rootDir = path.resolve(__dirname, '..');
-    const healthUrl = 'http://127.0.0.1:3001/api/tags';
+    const healthUrl = (process.env.API_URL || 'http://127.0.0.1:3001/api') + '/tags';
 
     // 1. Fast probe: check if server is already responding
     try {
@@ -18,11 +18,15 @@ export async function ensureServerRunning(): Promise<void> {
         // Server is not responding, auto-heal
     }
 
-    console.log('\n[Self-Healing] Backend containers are not responding. Starting Docker compose...');
-    try {
-        execSync('docker compose up -d', { cwd: rootDir, stdio: 'inherit' });
-    } catch (error) {
-        console.error('[Self-Healing] Failed to execute docker compose up -d:', error);
+    if (!process.env.CI) {
+        console.log('\n[Self-Healing] Backend containers are not responding. Starting Docker compose...');
+        try {
+            execSync('docker compose up -d', { cwd: rootDir, stdio: 'inherit' });
+        } catch (error) {
+            console.error('[Self-Healing] Failed to execute docker compose up -d:', error);
+        }
+    } else {
+        console.log(`\n[CI/Container] Probing backend health at ${healthUrl}...`);
     }
 
     // 2. Poll until server is healthy (up to 45 seconds)
