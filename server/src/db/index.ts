@@ -20,8 +20,8 @@ const originalPoolQuery = pool.query.bind(pool);
     const duration = Date.now() - start;
     const cleanSql = text ? text.replace(/\s+/g, ' ').trim() : '';
 
-    // Log runtime queries (skip migration tracking & DDL logs)
-    if (cleanSql && !cleanSql.startsWith('CREATE TABLE') && !cleanSql.includes('_migrations')) {
+    // Log runtime queries (skip migration tracking, DDL logs, & health check pings)
+    if (cleanSql && !cleanSql.startsWith('CREATE TABLE') && !cleanSql.includes('_migrations') && cleanSql !== 'SELECT 1') {
       console.log(`\x1b[36m[SQL Query]\x1b[0m ${cleanSql}`);
       if (params && params.length > 0) {
         console.log(`\x1b[90m  └─ Params: ${JSON.stringify(params)} | Duration: ${duration}ms | Rows: ${res?.rowCount ?? res?.rows?.length ?? 0}\x1b[0m`);

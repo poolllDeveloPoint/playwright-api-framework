@@ -30,7 +30,7 @@ export default defineConfig({
   webServer: process.env.CI ? undefined : {
     command: 'docker compose up',
     cwd: __dirname,
-    url: 'http://127.0.0.1:3001/api/tags',
+    url: 'http://127.0.0.1:3001/api/health',
     reuseExistingServer: !process.env.CI,
     timeout: 60 * 1000,
   },

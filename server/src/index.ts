@@ -5,8 +5,8 @@ import path from 'path';
 import YAML from 'yamljs';
 import swaggerUi from 'swagger-ui-express';
 import dotenv from 'dotenv';
-import { initDb } from './db';
-import { connectRedis } from './redis';
+import { initDb, pool } from './db';
+import { connectRedis, redis } from './redis';
 import authRouter from './routes/auth';
 import tagsRouter from './routes/tags';
 import articlesRouter from './routes/articles';
@@ -38,9 +38,57 @@ try {
   console.warn(`[Swagger] Warning loading swagger.yaml: ${err.message}`);
 }
 
-// 2. Health check route
-app.get('/api/health', (_req: Request, res: Response) => {
-  res.status(200).json({ status: 'ok', timestamp: new Date().toISOString() });
+// 2. Enterprise Deep Health Check route (Verifies Express, PostgreSQL, & Redis)
+app.get('/api/health', async (_req: Request, res: Response) => {
+  const health: {
+    status: 'healthy' | 'unhealthy';
+    timestamp: string;
+    services: {
+      database: { status: 'connected' | 'error'; latencyMs?: number; error?: string };
+      redis: { status: 'connected' | 'error'; latencyMs?: number; error?: string };
+    };
+  } = {
+    status: 'healthy',
+    timestamp: new Date().toISOString(),
+    services: {
+      database: { status: 'connected' },
+      redis: { status: 'connected' },
+    },
+  };
+
+  let isHealthy = true;
+
+  // 1. Probe PostgreSQL
+  const dbStart = Date.now();
+  try {
+    await pool.query('SELECT 1');
+    health.services.database.latencyMs = Date.now() - dbStart;
+  } catch (err: any) {
+    isHealthy = false;
+    health.services.database = {
+      status: 'error',
+      error: err.message,
+    };
+  }
+
+  // 2. Probe Redis
+  const redisStart = Date.now();
+  try {
+    const pong = await redis.ping();
+    if (pong !== 'PONG') throw new Error(`Unexpected Redis response: ${pong}`);
+    health.services.redis.latencyMs = Date.now() - redisStart;
+  } catch (err: any) {
+    isHealthy = false;
+    health.services.redis = {
+      status: 'error',
+      error: err.message,
+    };
+  }
+
+  health.status = isHealthy ? 'healthy' : 'unhealthy';
+  const statusCode = isHealthy ? 200 : 503;
+
+  return res.status(statusCode).json(health);
 });
 
 // 3. API Routes
